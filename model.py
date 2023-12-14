@@ -49,9 +49,11 @@ class User(SQLModel, table=True):
 	cell:str
 	status:str
 	code:str
+	income_tax:str
 	adresses:List['Address']=Relationship()
 	accounts:List['Account']=Relationship()
 	quotas:List['Quota']=Relationship()
+
 
 class Address(SQLModel, table=True):
 	"""docstring for Address"""
@@ -91,6 +93,7 @@ class Closure(SQLModel, table=True):
 	value:str
 	date:str
 	status:str
+	type:str
 
 class ReportPayment(SQLModel, table=True):
 	"""docstring for repor payment"""
@@ -101,6 +104,33 @@ class ReportPayment(SQLModel, table=True):
 	amount:str
 
 	user_id: int = Field(foreign_key='user.id')
+	closure_id: int = Field(foreign_key='closure.id')
+
+class Titulo(SQLModel, table=True):
+	"""docstring for titulos, exportar para quotes"""
+	
+	id: Optional[int] = Field(default=None, primary_key=True)
+	numero:str
+	situacao:str
+	cotista:str
+	cotas:str
+	data_aquis:str
+	mes_transf:str
+	ano_transf:str
+	cotista2:str
+
+
+class RuleTribute(SQLModel, table=True):
+	"""docstring for titulos, exportar para quotes"""
+	id: Optional[int] = Field(default=None, primary_key=True)
+	status:str
+	isento:str
+	faixa1:str
+	faixa2:str
+	faixa3:str
+	maximo:str
+	date:str
+
 
 
 
@@ -195,6 +225,43 @@ def push_quote(
 
         session.add(quote)
         session.commit()
+
+def push_imposto(
+	code:str,
+	status:str,
+
+	):
+    
+    with Session(engine) as session:
+        query = select(User).where(User.code == code)
+        data = session.exec(query).first()
+        
+        user = session.get(User , data.id)
+        user.income_tax=status
+        session.commit()
+        """
+        
+        query = select(User ).where(User.code==user )
+        us = session.exec(query).first()
+        print(us)
+        quote = Quota()
+        
+        quote.old = old
+        quote.code = code
+        quote.grouping = grouping
+        quote.status = status
+        quote.date = date
+        
+        if us:
+        	quote.user_id = us.id
+       	else:
+        	quote.user_id = 99999
+
+        session.add(quote)
+        session.commit()
+        """
+
+
 
 
 """
